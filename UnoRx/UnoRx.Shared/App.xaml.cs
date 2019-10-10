@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -7,6 +8,16 @@ using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using UnoRx.Views;
+using Splat.Microsoft.Extensions.DependencyInjection;
+using ReactiveUI;
+using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Logging.EventLog;
+using Splat;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using Splat.Microsoft.Extensions.Logging;
+using System.Reflection;
+using UnoRx.ViewModels;
 
 namespace UnoRx
 {
@@ -22,13 +33,12 @@ namespace UnoRx
     public App()
     {
       Initialize();
-      ConfigureFilters(Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory);
 
       this.InitializeComponent();
       this.Suspending += OnSuspending;
     }
 
-    public IServiceProvider Services { get; private set; }
+    public IServiceProvider ServiceProvider { get; private set; }
 
     void Initialize()
     {
@@ -37,12 +47,66 @@ namespace UnoRx
         .ConfigureServices(ConfigureServices)
         .ConfigureLogging(loggingBuilder =>
         {
+          // remove loggers incompatible with UWP
+          {
+            var eventLoggers = loggingBuilder.Services
+              .Where(l => l.ImplementationType == typeof(EventLogLoggerProvider))
+              .ToList();
+
+            foreach (var el in eventLoggers)
+              loggingBuilder.Services.Remove(el);
+          }
+
+          //Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.WithFilter(CreateFilterLoggerSettings());
+          loggingBuilder
+          .AddSplat()
+            //.ClearProviders()            
+#if DEBUG
+            .SetMinimumLevel(LogLevel.Debug)
+#else
+            .SetMinimumLevel(LogLevel.Information)
+#endif      
+            .AddConsole();
+
+
+
         })
         .Build();
+
+      ServiceProvider = host.Services;
+      ServiceProvider.UseMicrosoftDependencyResolver();
     }
 
     void ConfigureServices(IServiceCollection services)
-    {       
+    {
+      services.UseMicrosoftDependencyResolver();
+      var resolver = Splat.Locator.CurrentMutable;
+      resolver.InitializeSplat();
+      resolver.InitializeReactiveUI();
+
+      // register view models
+      services.AddSingleton<NavigationViewModel>();
+      services.AddSingleton<IScreen>(sp => sp.GetRequiredService<NavigationViewModel>());
+
+
+
+      // register views
+      {
+        var vf = typeof(IViewFor<>);
+        bool isGenericIViewFor(Type ii) => ii.IsGenericType && ii.GetGenericTypeDefinition() == vf;
+        var views = Assembly.GetExecutingAssembly().DefinedTypes
+          .Where(t => !t.IsAbstract)
+          .Where(t => t.ImplementedInterfaces.Any(isGenericIViewFor));
+
+        foreach (var v in views)
+        {
+          var ii = v.ImplementedInterfaces.Single(isGenericIViewFor);
+
+          services.AddTransient(ii, v);
+          resolver.Register(() => Locator.Current.GetService(v), ii, "Landscape");
+        }
+      }
+
     }
 
     /// <summary>
@@ -85,7 +149,10 @@ namespace UnoRx
           // When the navigation stack isn't restored navigate to the first page,
           // configuring the new page by passing required information as a navigation
           // parameter
-          rootFrame.Navigate(typeof(MainPage), e.Arguments);
+          var vm = ServiceProvider.GetService<NavigationViewModel>();
+          var view = ServiceProvider.GetRequiredService<IViewLocator>().ResolveView(vm);
+          rootFrame.Content = view;
+          rootFrame.DataContext = vm;
         }
         // Ensure the current window is active
         Windows.UI.Xaml.Window.Current.Activate();
@@ -121,42 +188,32 @@ namespace UnoRx
     /// Configures global logging
     /// </summary>
     /// <param name="factory"></param>
-    static void ConfigureFilters(ILoggerFactory factory)
-    {
-      //TODO
-      factory
-        .WithFilter(new FilterLoggerSettings
-          {
-            { "Uno", LogLevel.Warning },
-            { "Windows", LogLevel.Warning },
+    static FilterLoggerSettings CreateFilterLoggerSettings() =>
+      new FilterLoggerSettings
+      {
+        { "Uno", LogLevel.Warning },
+        { "Windows", LogLevel.Warning },
 
-						// Debug JS interop
-						// { "Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug },
+        // Debug JS interop
+        // { "Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug },
 
-						// Generic Xaml events
-						// { "Windows.UI.Xaml", LogLevel.Debug },
-						// { "Windows.UI.Xaml.VisualStateGroup", LogLevel.Debug },
-						// { "Windows.UI.Xaml.StateTriggerBase", LogLevel.Debug },
-						// { "Windows.UI.Xaml.UIElement", LogLevel.Debug },
+        // Generic Xaml events
+        // { "Windows.UI.Xaml", LogLevel.Debug },
+        // { "Windows.UI.Xaml.VisualStateGroup", LogLevel.Debug },
+        // { "Windows.UI.Xaml.StateTriggerBase", LogLevel.Debug },
+        // { "Windows.UI.Xaml.UIElement", LogLevel.Debug },
 
-						// Layouter specific messages
-						// { "Windows.UI.Xaml.Controls", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.Layouter", LogLevel.Debug },
-						// { "Windows.UI.Xaml.Controls.Panel", LogLevel.Debug },
-						// { "Windows.Storage", LogLevel.Debug },
+        // Layouter specific messages
+        // { "Windows.UI.Xaml.Controls", LogLevel.Debug },
+        // { "Windows.UI.Xaml.Controls.Layouter", LogLevel.Debug },
+        // { "Windows.UI.Xaml.Controls.Panel", LogLevel.Debug },
+        // { "Windows.Storage", LogLevel.Debug },
 
-						// Binding related messages
-						// { "Windows.UI.Xaml.Data", LogLevel.Debug },
+        // Binding related messages
+        // { "Windows.UI.Xaml.Data", LogLevel.Debug },
 
-						// DependencyObject memory references tracking
-						// { "ReferenceHolder", LogLevel.Debug },
-					}
-        );
-#if DEBUG
-      //.AddConsole(LogLevel.Debug);
-#else
-        //.AddConsole(LogLevel.Information);
-#endif
-    }
+        // DependencyObject memory references tracking
+        // { "ReferenceHolder", LogLevel.Debug },
+      };
   }
 }

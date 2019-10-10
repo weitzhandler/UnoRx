@@ -34,11 +34,12 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Filter" Version="1.1.2" />
-    <PackageReference Include="ReactiveUI.Fody" Version="10.3.1" />
-    <PackageReference Include="ReactiveUI.Uno" Version="10.3.1" />
-    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
+    <PackageReference Include="ReactiveUI.Fody" Version="10.4.1" />
+    <PackageReference Include="ReactiveUI.Uno" Version="10.4.1" />
+    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="9.1.1" />
+    <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="9.1.1" />
     <PackageReference Include="Uno.UI" Version="1.45.0" />
-    <PackageReference Include="Uno.Wasm.Bootstrap" Version="1.0.0-dev.244" />
+    <PackageReference Include="Uno.Wasm.Bootstrap" Version="1.0.0-dev.302" />
     <DotNetCliToolReference Include="Uno.Wasm.Bootstrap.Cli" Version="1.0.0-dev.244" />
   </ItemGroup>
   <Import Project="..\UnoRx.Shared\UnoRx.Shared.projitems" Label="Shared" Condition="Exists('..\UnoRx.Shared\UnoRx.Shared.projitems')" />
