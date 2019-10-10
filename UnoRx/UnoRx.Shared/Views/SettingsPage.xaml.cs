@@ -18,19 +18,16 @@ using Windows.UI.Xaml.Navigation;
 
 namespace UnoRx.Views
 {
-
-  public abstract partial class NavigationPageBase : AppReactivePage<NavigationViewModel>
-  { 
+  public abstract partial class SettingsPageBase : AppReactivePage<SettingsViewModel>
+  {
   }
-
-  
 
   /// <summary>
   /// An empty page that can be used on its own or navigated to within a Frame.
   /// </summary>
-  public partial class NavigationPage : NavigationPageBase
+  public partial class SettingsPage : SettingsPageBase
   {
-    public NavigationPage()
+    public SettingsPage()
     {
       this.InitializeComponent();
     }

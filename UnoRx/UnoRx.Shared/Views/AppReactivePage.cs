@@ -17,7 +17,7 @@ namespace UnoRx.Views
         partial
 #endif
         class AppReactivePage<TViewModel> :
-        ReactiveUI.Uno.ReactivePage<TViewModel>, IViewFor<TViewModel>
+        ReactiveUI.Uno.ReactivePage<TViewModel>, IViewFor<TViewModel>, IActivatableView
         where TViewModel : class
   {
 
@@ -70,6 +70,8 @@ namespace UnoRx.Views
     {
       DataContextChanged += (s, e) => OnDataContextChanged(e.NewValue);
       RegisterPropertyChangedCallback(ViewModelProperty, (s, p) => OnViewModelChanged());
+
+      this.WhenActivated(_ => { });
     }
 
     protected virtual void OnDataContextChanged(object newValue)

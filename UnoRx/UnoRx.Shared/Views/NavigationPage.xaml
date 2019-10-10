@@ -7,9 +7,29 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:rxuno="using:ReactiveUI.Uno"
   xmlns:v="using:UnoRx.Views"
+  xmlns:vm="using:UnoRx.ViewModels"
   mc:Ignorable="d"
   Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-  <NavigationView>
+  <NavigationView MenuItemsSource="{Binding NavigationItems}" SelectedItem="{Binding SelectedNavigationItem, Mode=TwoWay}">
+    <NavigationView.MenuItemTemplate>
+      <DataTemplate x:DataType="vm:NavigationItem">
+        <Grid HorizontalAlignment="Left"
+              Height="40"
+              Margin="-16,0,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="48" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Viewbox Grid.Column="0"
+                     Margin="16,12">
+            <SymbolIcon Symbol="{x:Bind Symbol}" />
+          </Viewbox>
+          <ContentPresenter Content="{x:Bind Title}"
+                              Grid.Column="1"
+                              VerticalAlignment="Center"/>
+        </Grid>
+      </DataTemplate>
+    </NavigationView.MenuItemTemplate>
     <rxuno:RoutedViewHost Router="{Binding Router}" />
   </NavigationView>
 </v:NavigationPageBase>

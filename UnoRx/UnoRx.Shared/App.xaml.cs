@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -18,6 +19,7 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using Splat.Microsoft.Extensions.Logging;
 using System.Reflection;
 using UnoRx.ViewModels;
+using Microsoft.Extensions.FileProviders;
 
 namespace UnoRx
 {
@@ -44,6 +46,29 @@ namespace UnoRx
     {
       var host = Host
         .CreateDefaultBuilder()
+        .ConfigureAppConfiguration((hostingContext, config) =>
+        {
+          config.Properties.Clear();
+          config.Sources.Clear();
+          hostingContext.Properties.Clear();          
+          
+          //foreach (var fileProvider in config.Properties.Where(p => p.Value is PhysicalFileProvider).ToList())
+          //  config.Properties.Remove(fileProvider);
+
+          //IHostEnvironment hostingEnvironment = hostingContext.HostingEnvironment;
+          //config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).AddJsonFile("appsettings." + hostingEnvironment.EnvironmentName + ".json", optional: true, reloadOnChange: true);
+
+
+          //if (hostingEnvironment.IsDevelopment() && !string.IsNullOrEmpty(hostingEnvironment.ApplicationName))
+          //{
+          //  Assembly assembly = Assembly.Load(new AssemblyName(hostingEnvironment.ApplicationName));
+          //  if (assembly != null)
+          //  {
+          //    config.AddUserSecrets(assembly, optional: true);
+          //  }
+          //}
+          //config.AddEnvironmentVariables();          
+        })
         .ConfigureServices(ConfigureServices)
         .ConfigureLogging(loggingBuilder =>
         {
@@ -67,9 +92,6 @@ namespace UnoRx
             .SetMinimumLevel(LogLevel.Information)
 #endif      
             .AddConsole();
-
-
-
         })
         .Build();
 
@@ -84,18 +106,25 @@ namespace UnoRx
       resolver.InitializeSplat();
       resolver.InitializeReactiveUI();
 
+      var allTypes = Assembly.GetExecutingAssembly()
+        .DefinedTypes
+        .Where(t => !t.IsAbstract);
+
       // register view models
-      services.AddSingleton<NavigationViewModel>();
-      services.AddSingleton<IScreen>(sp => sp.GetRequiredService<NavigationViewModel>());
+      {
+        services.AddSingleton<NavigationViewModel>();
+        services.AddSingleton<IScreen>(sp => sp.GetRequiredService<NavigationViewModel>());
 
-
+        var rvms = allTypes.Where(t => typeof(RoutableViewModel).IsAssignableFrom(t));
+        foreach (var rvm in rvms)
+          services.AddTransient(rvm);
+      }
 
       // register views
       {
         var vf = typeof(IViewFor<>);
         bool isGenericIViewFor(Type ii) => ii.IsGenericType && ii.GetGenericTypeDefinition() == vf;
-        var views = Assembly.GetExecutingAssembly().DefinedTypes
-          .Where(t => !t.IsAbstract)
+        var views = allTypes
           .Where(t => t.ImplementedInterfaces.Any(isGenericIViewFor));
 
         foreach (var v in views)
@@ -103,7 +132,7 @@ namespace UnoRx
           var ii = v.ImplementedInterfaces.Single(isGenericIViewFor);
 
           services.AddTransient(ii, v);
-          resolver.Register(() => Locator.Current.GetService(v), ii, "Landscape");
+          Locator.CurrentMutable.Register(() => Locator.Current.GetService(v), ii, "Landscape");
         }
       }
 
