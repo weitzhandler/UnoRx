@@ -81,7 +81,7 @@
     <PackageReference Include="Splat.Microsoft.Extensions.Logging">
       <Version>9.1.1</Version>
     </PackageReference>
-    <PackageReference Include="Uno.UI" Version="1.45.0" />
+    <PackageReference Include="Uno.UI" Version="2.0.512-dev.3325" />
     <PackageReference Include="Uno.UniversalImageLoader" Version="1.9.32" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Filter" Version="1.1.2" />

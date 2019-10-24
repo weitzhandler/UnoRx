@@ -30,7 +30,6 @@
     <PackageReference Include="Splat.Microsoft.Extensions.Logging">
       <Version>9.1.1</Version>
     </PackageReference>
-    <PackageReference Include="Uno.Core" Version="1.28.0" />
   </ItemGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

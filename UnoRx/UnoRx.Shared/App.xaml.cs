@@ -1,25 +1,21 @@
-﻿using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.EventLog;
+using ReactiveUI;
+using Splat;
+using Splat.Microsoft.Extensions.DependencyInjection;
+using Splat.Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
+using System.Reflection;
+using UnoRx.ViewModels;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-using UnoRx.Views;
-using Splat.Microsoft.Extensions.DependencyInjection;
-using ReactiveUI;
-using Microsoft.Extensions.Logging.Configuration;
-using Microsoft.Extensions.Logging.EventLog;
-using Splat;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-using Splat.Microsoft.Extensions.Logging;
-using System.Reflection;
-using UnoRx.ViewModels;
-using Microsoft.Extensions.FileProviders;
 
 namespace UnoRx
 {
@@ -50,8 +46,8 @@ namespace UnoRx
         {
           config.Properties.Clear();
           config.Sources.Clear();
-          hostingContext.Properties.Clear();          
-          
+          hostingContext.Properties.Clear();
+
           //foreach (var fileProvider in config.Properties.Where(p => p.Value is PhysicalFileProvider).ToList())
           //  config.Properties.Remove(fileProvider);
 
@@ -84,14 +80,19 @@ namespace UnoRx
 
           //Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.WithFilter(CreateFilterLoggerSettings());
           loggingBuilder
-          .AddSplat()
-            //.ClearProviders()            
+#if !__WASM__
+            .AddConsole()
+#else
+            .ClearProviders()            
+#endif
+            .AddSplat()
 #if DEBUG
             .SetMinimumLevel(LogLevel.Debug)
 #else
             .SetMinimumLevel(LogLevel.Information)
-#endif      
-            .AddConsole();
+#endif
+            ;
+
         })
         .Build();
 
@@ -132,7 +133,7 @@ namespace UnoRx
           var ii = v.ImplementedInterfaces.Single(isGenericIViewFor);
 
           services.AddTransient(ii, v);
-          Locator.CurrentMutable.Register(() => Locator.Current.GetService(v), ii, "Landscape");
+          //Locator.CurrentMutable.Register(() => Locator.Current.GetService(v), ii, "Landscape");
         }
       }
 

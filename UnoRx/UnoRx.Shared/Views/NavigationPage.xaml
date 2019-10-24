@@ -10,24 +10,19 @@
   xmlns:vm="using:UnoRx.ViewModels"
   mc:Ignorable="d"
   Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-  <NavigationView MenuItemsSource="{Binding NavigationItems}" SelectedItem="{Binding SelectedNavigationItem, Mode=TwoWay}">
+  <NavigationView
+    AlwaysShowHeader="True"
+    IsSettingsVisible="False"
+    Header="{Binding SelectedNavigationItem.Title}"
+    MenuItemsSource="{Binding NavigationItems}"
+    SelectedItem="{Binding SelectedNavigationItem, Mode=TwoWay}">
     <NavigationView.MenuItemTemplate>
       <DataTemplate x:DataType="vm:NavigationItem">
-        <Grid HorizontalAlignment="Left"
-              Height="40"
-              Margin="-16,0,0,0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="48" />
-            <ColumnDefinition Width="*" />
-          </Grid.ColumnDefinitions>
-          <Viewbox Grid.Column="0"
-                     Margin="16,12">
-            <SymbolIcon Symbol="{x:Bind Symbol}" />
-          </Viewbox>
-          <ContentPresenter Content="{x:Bind Title}"
-                              Grid.Column="1"
-                              VerticalAlignment="Center"/>
-        </Grid>
+        <NavigationViewItem Content="{x:Bind Title}">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="{x:Bind Symbol}"/>
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
       </DataTemplate>
     </NavigationView.MenuItemTemplate>
     <rxuno:RoutedViewHost Router="{Binding Router}" />

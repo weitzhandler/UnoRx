@@ -5,7 +5,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <WasmHead>true</WasmHead>
     <DefineConstants>$(DefineConstants);__WASM__</DefineConstants>
-    <NoWarn>NU1701</NoWarn>
+    <NoWarn>NU1701</NoWarn>                                                     
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <MonoRuntimeDebuggerEnabled>true</MonoRuntimeDebuggerEnabled>
+    <DefineConstants>$(DefineConstants);TRACE;DEBUG</DefineConstants>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <WasmShellILLinkerEnabled>False</WasmShellILLinkerEnabled>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="..\UnoRx.UWP\Assets\*.png" Link="Assets\%(FileName)%(Extension)" />
@@ -39,7 +46,7 @@
     <PackageReference Include="ReactiveUI.Uno" Version="10.4.1" />
     <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="9.1.1" />
     <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="9.1.1" />
-    <PackageReference Include="Uno.UI" Version="1.45.0" />
+    <PackageReference Include="Uno.UI" Version="2.0.512-dev.3325" />
     <PackageReference Include="Uno.Wasm.Bootstrap" Version="1.0.0-dev.302" />
     <DotNetCliToolReference Include="Uno.Wasm.Bootstrap.Cli" Version="1.0.0-dev.244" />
   </ItemGroup>
