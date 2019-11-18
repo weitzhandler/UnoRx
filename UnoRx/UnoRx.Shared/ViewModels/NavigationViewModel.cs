@@ -12,7 +12,7 @@ using System.Text;
 
 namespace UnoRx.ViewModels
 {
-  public class NavigationViewModel : AppViewModel, IScreen, IActivatableViewModel
+  public class NavigationViewModel : ViewModelBase, IScreen, IActivatableViewModel
   {
     readonly IServiceProvider _ServiceProvider;
     public NavigationViewModel(IServiceProvider serviceProvider)
@@ -27,7 +27,7 @@ namespace UnoRx.ViewModels
           .DistinctUntilChanged()
           .Select(navItem => navItem.ViewModelType)
           .Select(vmType => (IRoutableViewModel)serviceProvider.GetRequiredService(vmType))
-          .InvokeCommand(this, vm => vm.Router.Navigate)
+          .InvokeCommand(Router.Navigate)
           .DisposeWith(disposables);
       });
     }

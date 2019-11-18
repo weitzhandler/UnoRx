@@ -6,11 +6,11 @@ using System.Text;
 
 namespace UnoRx.ViewModels
 {
-  public abstract class AppViewModel : ReactiveObject
+  public abstract class ViewModelBase : ReactiveObject
   {
   }
 
-  public abstract class RoutableViewModel : AppViewModel, IRoutableViewModel
+  public abstract class RoutableViewModel : ViewModelBase, IRoutableViewModel
   {
     public RoutableViewModel(IScreen hostScreen)
     {
