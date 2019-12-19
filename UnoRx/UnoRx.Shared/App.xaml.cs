@@ -19,73 +19,74 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace UnoRx
 {
-  /// <summary>
-  /// Provides application-specific behavior to supplement the default Application class.
-  /// </summary>
-  sealed partial class App : Application
-  {
     /// <summary>
-    /// Initializes the singleton application object.  This is the first line of authored code
-    /// executed, and as such is the logical equivalent of main() or WinMain().
+    /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    public App()
+    sealed partial class App : Application
     {
-      Initialize();
-
-      this.InitializeComponent();
-      this.Suspending += OnSuspending;
-    }
-
-    public IServiceProvider ServiceProvider { get; private set; }
-
-    void Initialize()
-    {
-      var host = Host
-        .CreateDefaultBuilder()
-        .ConfigureAppConfiguration((hostingContext, config) =>
+        /// <summary>
+        /// Initializes the singleton application object.  This is the first line of authored code
+        /// executed, and as such is the logical equivalent of main() or WinMain().
+        /// </summary>
+        public App()
         {
-          config.Properties.Clear();
-          config.Sources.Clear();
-          hostingContext.Properties.Clear();
+            Initialize();
 
-          //foreach (var fileProvider in config.Properties.Where(p => p.Value is PhysicalFileProvider).ToList())
-          //  config.Properties.Remove(fileProvider);
+            this.InitializeComponent();
+            this.Suspending += OnSuspending;
+        }
 
-          //IHostEnvironment hostingEnvironment = hostingContext.HostingEnvironment;
-          //config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).AddJsonFile("appsettings." + hostingEnvironment.EnvironmentName + ".json", optional: true, reloadOnChange: true);
+        public IServiceProvider ServiceProvider { get; private set; }
 
-
-          //if (hostingEnvironment.IsDevelopment() && !string.IsNullOrEmpty(hostingEnvironment.ApplicationName))
-          //{
-          //  Assembly assembly = Assembly.Load(new AssemblyName(hostingEnvironment.ApplicationName));
-          //  if (assembly != null)
-          //  {
-          //    config.AddUserSecrets(assembly, optional: true);
-          //  }
-          //}
-          //config.AddEnvironmentVariables();          
-        })
-        .ConfigureServices(ConfigureServices)
-        .ConfigureLogging(loggingBuilder =>
+        void Initialize()
         {
-          // remove loggers incompatible with UWP
-          {
-            var eventLoggers = loggingBuilder.Services
-              .Where(l => l.ImplementationType == typeof(EventLogLoggerProvider))
-              .ToList();
+            var host = Host
+              .CreateDefaultBuilder()
+              .ConfigureAppConfiguration((hostingContext, config) =>
+              {
+                  config.Properties.Clear();
+                  config.Sources.Clear();
+                  hostingContext.Properties.Clear();
 
-            foreach (var el in eventLoggers)
-              loggingBuilder.Services.Remove(el);
-          }
+                  //foreach (var fileProvider in config.Properties.Where(p => p.Value is PhysicalFileProvider).ToList())
+                  //  config.Properties.Remove(fileProvider);
 
-          //Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.WithFilter(CreateFilterLoggerSettings());
-          loggingBuilder
+                  //IHostEnvironment hostingEnvironment = hostingContext.HostingEnvironment;
+                  //config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).AddJsonFile("appsettings." + hostingEnvironment.EnvironmentName + ".json", optional: true, reloadOnChange: true);
+
+
+                  //if (hostingEnvironment.IsDevelopment() && !string.IsNullOrEmpty(hostingEnvironment.ApplicationName))
+                  //{
+                  //  Assembly assembly = Assembly.Load(new AssemblyName(hostingEnvironment.ApplicationName));
+                  //  if (assembly != null)
+                  //  {
+                  //    config.AddUserSecrets(assembly, optional: true);
+                  //  }
+                  //}
+                  //config.AddEnvironmentVariables();          
+              })
+              .ConfigureServices(ConfigureServices)
+              .ConfigureLogging(loggingBuilder =>
+              {
+                  // remove loggers incompatible with UWP
+                  {
+                      var eventLoggers = loggingBuilder.Services
+                      .Where(l => l.ImplementationType == typeof(EventLogLoggerProvider))
+                      .ToList();
+
+                      foreach (var el in eventLoggers)
+                          loggingBuilder.Services.Remove(el);
+                  }
+
+                  //Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.WithFilter(CreateFilterLoggerSettings());
+                  loggingBuilder
+                  .AddSplat()
 #if !__WASM__
             .AddConsole()
 #else
             .ClearProviders()            
 #endif
-            .AddSplat()
+
 #if DEBUG
             .SetMinimumLevel(LogLevel.Debug)
 #else
@@ -93,157 +94,123 @@ namespace UnoRx
 #endif
             ;
 
-        })
-        .Build();
+              })
+              .Build();
 
-      ServiceProvider = host.Services;
-      ServiceProvider.UseMicrosoftDependencyResolver();
-    }
-
-    void ConfigureServices(IServiceCollection services)
-    {
-      services.UseMicrosoftDependencyResolver();
-      var resolver = Splat.Locator.CurrentMutable;
-      resolver.InitializeSplat();
-      resolver.InitializeReactiveUI();
-
-      var allTypes = Assembly.GetExecutingAssembly()
-        .DefinedTypes
-        .Where(t => !t.IsAbstract);
-
-      // register view models
-      {
-        services.AddSingleton<NavigationViewModel>();
-        services.AddSingleton<IScreen>(sp => sp.GetRequiredService<NavigationViewModel>());
-
-        var rvms = allTypes.Where(t => typeof(RoutableViewModel).IsAssignableFrom(t));
-        foreach (var rvm in rvms)
-          services.AddTransient(rvm);
-      }
-
-      // register views
-      {
-        var vf = typeof(IViewFor<>);
-        bool isGenericIViewFor(Type ii) => ii.IsGenericType && ii.GetGenericTypeDefinition() == vf;
-        var views = allTypes
-          .Where(t => t.ImplementedInterfaces.Any(isGenericIViewFor));
-
-        foreach (var v in views)
-        {
-          var ii = v.ImplementedInterfaces.Single(isGenericIViewFor);
-
-          services.AddTransient(ii, v);
-          //Locator.CurrentMutable.Register(() => Locator.Current.GetService(v), ii, "Landscape");
+            ServiceProvider = host.Services;
+            ServiceProvider.UseMicrosoftDependencyResolver();
         }
-      }
 
-    }
+        void ConfigureServices(IServiceCollection services)
+        {
+            services.UseMicrosoftDependencyResolver();
+            var resolver = Splat.Locator.CurrentMutable;
+            resolver.InitializeSplat();
+            resolver.InitializeReactiveUI();
 
-    /// <summary>
-    /// Invoked when the application is launched normally by the end user.  Other entry points
-    /// will be used such as when the application is launched to open a specific file.
-    /// </summary>
-    /// <param name="e">Details about the launch request and process.</param>
-    protected override void OnLaunched(LaunchActivatedEventArgs e)
-    {
+            var allTypes = Assembly.GetExecutingAssembly()
+              .DefinedTypes
+              .Where(t => !t.IsAbstract);
+
+            // register view models
+            {
+                services.AddSingleton<NavigationViewModel>();
+                services.AddSingleton<IScreen>(sp => sp.GetRequiredService<NavigationViewModel>());
+
+                var rvms = allTypes.Where(t => typeof(RoutableViewModel).IsAssignableFrom(t));
+                foreach (var rvm in rvms)
+                    services.AddTransient(rvm);
+            }
+
+            // register views
+            {
+                var vf = typeof(IViewFor<>);
+                bool isGenericIViewFor(Type ii) => ii.IsGenericType && ii.GetGenericTypeDefinition() == vf;
+                var views = allTypes
+                  .Where(t => t.ImplementedInterfaces.Any(isGenericIViewFor));
+
+                foreach (var v in views)
+                {
+                    var ii = v.ImplementedInterfaces.Single(isGenericIViewFor);
+
+                    services.AddTransient(ii, v);
+                    //Locator.CurrentMutable.Register(() => Locator.Current.GetService(v), ii, "Landscape");
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Invoked when the application is launched normally by the end user.  Other entry points
+        /// will be used such as when the application is launched to open a specific file.
+        /// </summary>
+        /// <param name="e">Details about the launch request and process.</param>
+        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        {
 #if DEBUG
-      if (System.Diagnostics.Debugger.IsAttached)
-      {
-        // this.DebugSettings.EnableFrameRateCounter = true;
-      }
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                // this.DebugSettings.EnableFrameRateCounter = true;
+            }
 #endif
-      Frame rootFrame = Windows.UI.Xaml.Window.Current.Content as Frame;
 
-      // Do not repeat app initialization when the Window already has content,
-      // just ensure that the window is active
-      if (rootFrame == null)
-      {
-        // Create a Frame to act as the navigation context and navigate to the first page
-        rootFrame = new Frame();
+            // Do not repeat app initialization when the Window already has content,
+            // just ensure that the window is active
+            if (!(Windows.UI.Xaml.Window.Current.Content is Frame rootFrame))
+            {
+                // Create a Frame to act as the navigation context and navigate to the first page
+                rootFrame = new Frame();
 
-        rootFrame.NavigationFailed += OnNavigationFailed;
+                rootFrame.NavigationFailed += OnNavigationFailed;
 
-        if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
-        {
-          //TODO: Load state from previously suspended application
+                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
+                {
+                    //TODO: Load state from previously suspended application
+                }
+
+                // Place the frame in the current Window
+                Windows.UI.Xaml.Window.Current.Content = rootFrame;
+            }
+
+            if (e.PrelaunchActivated == false)
+            {
+                if (rootFrame.Content == null)
+                {
+                    // When the navigation stack isn't restored navigate to the first page,
+                    // configuring the new page by passing required information as a navigation
+                    // parameter
+                    var vm = ServiceProvider.GetService<NavigationViewModel>();
+                    var view = ServiceProvider.GetRequiredService<IViewLocator>().ResolveView(vm);
+                    rootFrame.Content = view;
+                    rootFrame.DataContext = vm;
+                }
+                // Ensure the current window is active
+                Windows.UI.Xaml.Window.Current.Activate();
+            }
         }
 
-        // Place the frame in the current Window
-        Windows.UI.Xaml.Window.Current.Content = rootFrame;
-      }
-
-      if (e.PrelaunchActivated == false)
-      {
-        if (rootFrame.Content == null)
+        /// <summary>
+        /// Invoked when Navigation to a certain page fails
+        /// </summary>
+        /// <param name="sender">The Frame which failed navigation</param>
+        /// <param name="e">Details about the navigation failure</param>
+        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
-          // When the navigation stack isn't restored navigate to the first page,
-          // configuring the new page by passing required information as a navigation
-          // parameter
-          var vm = ServiceProvider.GetService<NavigationViewModel>();
-          var view = ServiceProvider.GetRequiredService<IViewLocator>().ResolveView(vm);
-          rootFrame.Content = view;
-          rootFrame.DataContext = vm;
+            throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
-        // Ensure the current window is active
-        Windows.UI.Xaml.Window.Current.Activate();
-      }
+
+        /// <summary>
+        /// Invoked when application execution is being suspended.  Application state is saved
+        /// without knowing whether the application will be terminated or resumed with the contents
+        /// of memory still intact.
+        /// </summary>
+        /// <param name="sender">The source of the suspend request.</param>
+        /// <param name="e">Details about the suspend request.</param>
+        private void OnSuspending(object sender, SuspendingEventArgs e)
+        {
+            var deferral = e.SuspendingOperation.GetDeferral();
+            //TODO: Save application state and stop any background activity
+            deferral.Complete();
+        }
     }
-
-    /// <summary>
-    /// Invoked when Navigation to a certain page fails
-    /// </summary>
-    /// <param name="sender">The Frame which failed navigation</param>
-    /// <param name="e">Details about the navigation failure</param>
-    void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
-    {
-      throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
-    }
-
-    /// <summary>
-    /// Invoked when application execution is being suspended.  Application state is saved
-    /// without knowing whether the application will be terminated or resumed with the contents
-    /// of memory still intact.
-    /// </summary>
-    /// <param name="sender">The source of the suspend request.</param>
-    /// <param name="e">Details about the suspend request.</param>
-    private void OnSuspending(object sender, SuspendingEventArgs e)
-    {
-      var deferral = e.SuspendingOperation.GetDeferral();
-      //TODO: Save application state and stop any background activity
-      deferral.Complete();
-    }
-
-
-    /// <summary>
-    /// Configures global logging
-    /// </summary>
-    /// <param name="factory"></param>
-    static FilterLoggerSettings CreateFilterLoggerSettings() =>
-      new FilterLoggerSettings
-      {
-        { "Uno", LogLevel.Warning },
-        { "Windows", LogLevel.Warning },
-
-        // Debug JS interop
-        // { "Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug },
-
-        // Generic Xaml events
-        // { "Windows.UI.Xaml", LogLevel.Debug },
-        // { "Windows.UI.Xaml.VisualStateGroup", LogLevel.Debug },
-        // { "Windows.UI.Xaml.StateTriggerBase", LogLevel.Debug },
-        // { "Windows.UI.Xaml.UIElement", LogLevel.Debug },
-
-        // Layouter specific messages
-        // { "Windows.UI.Xaml.Controls", LogLevel.Debug },
-        // { "Windows.UI.Xaml.Controls.Layouter", LogLevel.Debug },
-        // { "Windows.UI.Xaml.Controls.Panel", LogLevel.Debug },
-        // { "Windows.Storage", LogLevel.Debug },
-
-        // Binding related messages
-        // { "Windows.UI.Xaml.Data", LogLevel.Debug },
-
-        // DependencyObject memory references tracking
-        // { "ReferenceHolder", LogLevel.Debug },
-      };
-  }
 }

@@ -13,6 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnoRx.UWP", "UnoRx\UnoRx.UW
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnoRx.Wasm", "UnoRx\UnoRx.Wasm\UnoRx.Wasm.csproj", "{A4E47009-AD91-4E19-AC8B-8EFE80D84630}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D3B16CFD-D313-4698-8A0D-0BDCF2448C7B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		UnoRx\UnoRx.Shared\UnoRx.Shared.projitems*{1f6a1b23-95e5-42fc-9296-b5e55fc31fa5}*SharedItemsImports = 4

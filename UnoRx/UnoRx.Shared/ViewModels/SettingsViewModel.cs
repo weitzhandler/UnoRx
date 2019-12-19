@@ -5,10 +5,10 @@ using System.Text;
 
 namespace UnoRx.ViewModels
 {
-  public class SettingsViewModel : RoutableViewModel
-  {
-    public SettingsViewModel(IScreen hostScreen) : base(hostScreen)
+    public class SettingsViewModel : RoutableViewModel
     {
+        public SettingsViewModel(IScreen hostScreen) : base(hostScreen)
+        {
+        }
     }
-  }
 }
