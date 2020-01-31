@@ -20,5 +20,5 @@ namespace UnoRx.ViewModels
 
         public string UrlPathSegment { get; }
         public IScreen HostScreen { get; }
-    }    
+    }
 }

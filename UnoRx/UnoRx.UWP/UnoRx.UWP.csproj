@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting">
-      <Version>3.1.0</Version>
+      <Version>3.1.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <!-- 
@@ -13,22 +13,25 @@
 			-->
       <Version>6.2.9</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Filter" Version="1.1.2" />
+    <PackageReference Include="Microsoft.UI.Xaml">
+      <Version>2.4.0-prerelease.200113001</Version>
+    </PackageReference>
     <PackageReference Include="ReactiveUI.Events">
-      <Version>11.0.1</Version>
+      <Version>11.1.23</Version>
     </PackageReference>
     <PackageReference Include="ReactiveUI.Fody">
-      <Version>11.0.1</Version>
+      <Version>11.1.23</Version>
     </PackageReference>
     <PackageReference Include="ReactiveUI.Uno">
-      <Version>11.0.1</Version>
+      <Version>11.1.23</Version>
     </PackageReference>
     <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection">
-      <Version>9.3.1</Version>
+      <Version>9.3.11</Version>
     </PackageReference>
     <PackageReference Include="Splat.Microsoft.Extensions.Logging">
-      <Version>9.3.1</Version>
+      <Version>9.3.11</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup>
@@ -41,7 +44,7 @@
     <AssemblyName>UnoRx</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.16299.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0.18362.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.16299.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -51,7 +54,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NETFX_CORE;WINDOWS_UWP;CODE_ANALYSIS;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION</DefineConstants>
     <NoWarn>;2008</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
